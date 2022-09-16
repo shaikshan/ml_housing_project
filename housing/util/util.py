@@ -87,7 +87,7 @@ def load_object(file_path:str):
         raise HousingException(e,sys) from e
 
 
-def load_data(file_path: str, schema_file_path: str) -> pd.DataFrame:
+def load_data(file_path: str, schema_file_path: str):
     try:
         datatset_schema = read_yaml_file(schema_file_path)
 

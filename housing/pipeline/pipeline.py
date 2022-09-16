@@ -1,12 +1,10 @@
-from collections import namedtuple
 from datetime import datetime
 import uuid
 from housing.config.configuration import Configuartion
 from housing.logger import logging, get_log_file_name
-from housing.exception import HousingException
+from housing.exception import HousingException  
 from threading import Thread
 from typing import List
-
 from multiprocessing import Process
 from housing.entity.artifact_entity import ModelPusherArtifact, DataIngestionArtifact, ModelEvaluationArtifact
 from housing.entity.artifact_entity import DataValidationArtifact, DataTransformationArtifact, ModelTrainerArtifact
@@ -35,7 +33,7 @@ class Pipeline(Thread):
     experiment: Experiment = Experiment(*([None] * 11))
     experiment_file_path = None
 
-    def __init__(self, config: Configuartion ) -> None:
+    def __init__(self, config:Configuartion=Configuartion) -> None:
         try:
             os.makedirs(config.training_pipeline_config.artifact_dir, exist_ok=True)
             Pipeline.experiment_file_path=os.path.join(config.training_pipeline_config.artifact_dir,EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME)

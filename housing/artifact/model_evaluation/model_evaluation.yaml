@@ -1,0 +1,5 @@
+best_model:
+  model_path: D:\ml_housing_project\housing\artifact\model_trainer\2022-08-27-10-26-47\trained_model\model.pkl
+history:
+  2022-08-27-10-26-47:
+    model_path: D:\ml_housing_project\housing\artifact\model_trainer\2022-08-26-16-02-22\trained_model\model.pkl
