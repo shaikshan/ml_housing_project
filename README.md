@@ -28,6 +28,18 @@ Domain: Finance and Housing
 5. Docker
 6. Heroku
 ```
+### Libraries to install:
+```
+numpy
+Flask
+gunicorn
+sklearn
+pandas
+PyYAML
+evidently
+dill
+matplotlib
+```
 ### ML Pipeline
 ![ML pipeline Flow](https://user-images.githubusercontent.com/97723040/198873404-b899344f-acce-42b6-af2d-38756eba6e70.png)
 ### Deployment Architecture
