@@ -19,7 +19,7 @@ Districts or block groups are the smallest geographical units for which the US C
 Domain: Finance and Housing
 ```
 ### Tools Used :
-
+![Project Tools](https://user-images.githubusercontent.com/97723040/198873340-075c9c98-a02a-4d55-91f0-ad584d64c7b7.png)
 ```
 1. VS code
 2. Python
