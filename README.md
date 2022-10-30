@@ -25,8 +25,8 @@ Domain: Finance and Housing
 2. Python
 3. Jupyter Notebook
 4. Git Hub
-5. Docker
-6. Heroku
+5. Heroku
+6. Docker
 ```
 ### Libraries to install:
 ```
