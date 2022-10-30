@@ -29,5 +29,6 @@ Domain: Finance and Housing
 6. Heroku
 ```
 ### ML Pipeline
-
+![ML pipeline Flow](https://user-images.githubusercontent.com/97723040/198873404-b899344f-acce-42b6-af2d-38756eba6e70.png)
 ### Deployment Architecture
+![Deployment Flow](https://user-images.githubusercontent.com/97723040/198873413-e85e40e6-8e8d-410e-83dc-7b1074db5195.png)
