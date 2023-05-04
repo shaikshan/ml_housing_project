@@ -11,7 +11,9 @@ def get_current_time_stamp():
 ROOT_DIR = os.getcwd()  #to get current working directory
 CONFIG_DIR = "config"
 CONFIG_FILE_NAME = "config.yaml"
+SCHEMA_FILE_NAME = "schema.yaml"
 CONFIG_FILE_PATH = os.path.join(ROOT_DIR,CONFIG_DIR,CONFIG_FILE_NAME)
+SCHEMA_FILE_PATH = os.path.join(ROOT_DIR,CONFIG_DIR,SCHEMA_FILE_NAME)
 
 
 

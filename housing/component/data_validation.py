@@ -6,10 +6,9 @@ from housing.entity.config_entity import DataValidationConfig
 from housing.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact
 import os,sys
 import pandas  as pd
-from evidently.model_profile import Profile
-from evidently.model_profile.sections import DataDriftProfileSection
-from evidently.dashboard import Dashboard
-from evidently.dashboard.tabs import DataDriftTab
+from housing.util.util import *
+from housing.constant import *
+from scipy.stats import ks_2samp
 import json
 
 class DataValidation:
@@ -21,6 +20,7 @@ class DataValidation:
             logging.info(f"{'>>'*30}Data Valdaition log started.{'<<'*30} \n\n")
             self.data_validation_config = data_validation_config
             self.data_ingestion_artifact = data_ingestion_artifact
+            self.schema_config = read_yaml_file(file_path=data_validation_config.schema_file_path)
         except Exception as e:
             raise HousingException(e,sys) from e
 
@@ -88,53 +88,104 @@ class DataValidation:
         except Exception as e:
             raise HousingException(e,sys) from e
 
-    def get_and_save_data_drift_report(self):
+    def validate_number_of_columns(self,dataframe:pd.DataFrame)->bool:
         try:
-            profile = Profile(sections=[DataDriftProfileSection()])
+            number_of_columns = len(self.schema_config['columns'])
 
-            train_df,test_df = self.get_train_and_test_df()
-
-            profile.calculate(train_df,test_df)
-
-            report = json.loads(profile.json())
-
-            report_file_path = self.data_validation_config.report_file_path
-            report_dir = os.path.dirname(report_file_path)
-            os.makedirs(report_dir,exist_ok=True)
-
-            with open(report_file_path,"w") as report_file:
-                json.dump(report, report_file, indent=6)
-            return report
+            if len(dataframe.columns)==number_of_columns:
+                return True
+            return False
         except Exception as e:
             raise HousingException(e,sys) from e
-
-    def save_data_drift_report_page(self):
+        
+    def is_numeric_columns_exist(self,dataframe:pd.DataFrame)->bool:
         try:
-            dashboard = Dashboard(tabs=[DataDriftTab()])
-            train_df,test_df = self.get_train_and_test_df()
-            dashboard.calculate(train_df,test_df)
+            numerical_columns = self.schema_config['numerical_columns']
+            dataframe_columns = dataframe.columns
 
-            report_page_file_path = self.data_validation_config.report_page_file_path
-            report_page_dir = os.path.dirname(report_page_file_path)
-            os.makedirs(report_page_dir,exist_ok=True)
 
-            dashboard.save(report_page_file_path)
+            missing_numerical_columns = []
+
+            numerical_columns_present = True
+            for num_column in numerical_columns:
+                if num_column not in dataframe_columns:
+                    numerical_columns_present = False
+                    missing_numerical_columns.append(num_column)
+
+            logging.info(f"Missing numerical columns:[{missing_numerical_columns}]")
+            return numerical_columns_present
+
         except Exception as e:
             raise HousingException(e,sys) from e
-
-    def is_data_drift_found(self)->bool:
+        
+    def get_data_drift_report(self,train_df,test_df,threshold=0.5)->bool:
         try:
-            report = self.get_and_save_data_drift_report()
-            self.save_data_drift_report_page()
-            return True
+            report ={}
+            status = True
+            True_count = 0
+            False_count = 0
+            for column in train_df.columns:
+                d1 = train_df[column]
+                d2 = test_df[column]
+                is_same_dist = ks_2samp(d1,d2)
+                if threshold<=is_same_dist.pvalue:
+                    is_found = False
+                else:
+                    is_found = True
+                if is_found is True:
+                    True_count +=1
+                else:
+                    False_count +=1
+                if True_count >= len(train_df.columns)//2:
+                    status =False
+                report.update({column:{
+                    "p_value":float(is_same_dist.pvalue),
+                    "drift_status":is_found
+                }})
+
+            logging.info(f"True count of data drift:[{True_count}]")
+            logging.info(f"False count of data drift:[{False_count}]")
+            logging.info(f"Difference of True and count and Number of columns:{True_count-len(train_df.columns)}")
+
+            #Creating directory
+            drift_report_file_path = self.data_validation_config.report_file_path
+            dir_name = os.path.dirname(drift_report_file_path)
+            os.makedirs(dir_name,exist_ok=True)
+
+            write_yaml_file(file_path=drift_report_file_path,data=report)
+
+            return status       
         except Exception as e:
             raise HousingException(e,sys) from e
-
+        
+    
     def initiate_data_validation(self)->DataValidationArtifact :
         try:
-            self.is_train_test_file_exists()
-            self.validate_dataset_schema()
-            self.is_data_drift_found()
+            error_message = ""
+            #Reading train and test data into DataFrame
+            train_df,test_df = self.get_train_and_test_df()
+
+            #Validate number of columns
+            status = self.validate_number_of_columns(dataframe=train_df)
+            if not status:
+                error_message = f"{error_message} Train dataframe does not contain all columns \n"
+            status = self.validate_number_of_columns(dataframe=test_df)
+            if not status:
+                error_message = f"{error_message} Test dataframe does not contain all columns \n"
+
+            #Validate numerical columns
+            status = self.is_numeric_columns_exist(dataframe=train_df)
+            if not status:
+                error_message = f"{error_message}Train dataframe does not contain numerical columns"
+            status = self.is_numeric_columns_exist(dataframe=test_df)
+            if not status:
+                error_message = f"{error_message}Test dataframe does not contain numerical columns"
+
+            if len(error_message)>0:
+                raise Exception(error_message)
+            
+            #Lets Check data drift
+            status = self.get_data_drift_report(train_df=train_df,test_df=test_df)
 
             data_validation_artifact = DataValidationArtifact(
                 schema_file_path=self.data_validation_config.schema_file_path,

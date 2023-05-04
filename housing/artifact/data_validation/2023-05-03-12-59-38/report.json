@@ -1,0 +1,30 @@
+households:
+  drift_status: true
+  p_value: 0.23292758479937536
+housing_median_age:
+  drift_status: false
+  p_value: 0.9428700807097679
+latitude:
+  drift_status: true
+  p_value: 0.26820577795692213
+longitude:
+  drift_status: true
+  p_value: 0.30314218135852977
+median_house_value:
+  drift_status: false
+  p_value: 0.6839707450098331
+median_income:
+  drift_status: false
+  p_value: 0.8759695036697718
+ocean_proximity:
+  drift_status: false
+  p_value: 0.9164573478838306
+population:
+  drift_status: true
+  p_value: 0.2872380820694662
+total_bedrooms:
+  drift_status: true
+  p_value: 0.170373735619055
+total_rooms:
+  drift_status: true
+  p_value: 0.1677628368290902
